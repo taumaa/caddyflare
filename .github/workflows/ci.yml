@@ -1,0 +1,34 @@
+name: CI
+
+permissions:
+  contents: read
+  packages: write
+
+on:
+  push:
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Récupérer le code
+      - uses: actions/checkout@v3
+
+      # 2. Se connecter à GHCR
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # 3. Construire et pousser l’image
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:latest
+            ghcr.io/${{ github.repository }}:${{ github.sha }}
